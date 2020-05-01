@@ -20,6 +20,16 @@ void ss_lcd_off(){
 	PORTB |= (1<<SS_LCD);
 }
 
+/** Slave-Initilize SPI function på en av atmega SLAVE_MODE*/
+void SPI_Init() {
+	DDRB |= (1<<MOSI)|(1<<SCK); 		//output pins SLAVE_MODE
+	DDRB |= (1<<SS);			//Sätter ss_till input istället.
+	DDRB &= ~(1<<MISO); 			//sätt "MISO" in
+	PORTB |= (1<<SS_LCD);			//"etta" på ss
+	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0); 	//sätt denna MCU till master
+	SPSR &= ~(1<<SPI2X);			//?speed doubler?
+}
+
 /** Initialize MCU as master */
 void spi_masterInit(){
 	/* Set MOSI, SCK, and SS_LCD as output, all others input */
@@ -35,6 +45,7 @@ void spi_transmit(uint8_t data){
 	/* Wait for transmission to complete */
 	while(!(SPSR & (1<<SPIF)));
 }
+
 
 /** Master receive data from slave via SPI */
 uint8_t spi_receive(uint8_t dummy){
